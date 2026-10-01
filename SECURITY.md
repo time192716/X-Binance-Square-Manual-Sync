@@ -1,31 +1,32 @@
-# Security
+# Security Notes
 
-## Security properties
+## Manual-only boundary
 
-- Manifest V3.
-- No remote JavaScript or `eval`.
-- Explicit extension CSP: `script-src 'self'; object-src 'self'`.
-- Incognito use disabled.
-- Permissions limited to `storage` and `alarms`.
-- Host access limited to X/Twitter and Binance.
-- No clipboard, cookies, history, downloads, tabs, webRequest, debugger, nativeMessaging, identity, management, or broad `<all_urls>` permission.
-- The MAIN-world hook returns immediately for requests whose URL does not contain `CreateTweet`; unrelated request bodies are not parsed.
-- Replies and reposts are excluded. Media is not uploaded and media-only `t.co` tokens are removed.
-- First detected X author is bound locally to avoid accidental cross-account posting. Binding can be reset explicitly.
-- Queue deduplication uses the X post ID.
+Version 2.1 accepts new delivery records only from the `SYNC_MANUAL_POST` extension message emitted after a user clicks a post's sync button. The former automatic `CreateTweet` interception files are not included in the manifest or package.
 
-## Key handling
+The content script resolves the currently signed-in X username from X's account UI and displays buttons only on posts whose author matches it. The service worker requires the same current username in the request and rejects any author mismatch before queueing.
 
-The Square OpenAPI key is destination-publishing authority and must be treated as a secret:
+During an upgrade, queue entries without the `source: "manual"` marker are removed. Alarm-based retries also ignore any non-manual record.
 
-- stored only in `chrome.storage.local`;
-- never hardcoded in source;
-- never sent to a developer backend;
-- never restored into an input element after saving;
-- removable from the options page.
+## Content validation
 
-Chrome local extension storage is not a hardware-backed secret store. A compromised device, browser profile, extension process, or malicious extension with sufficient access can still expose local data. Use a Square-only publishing key with the narrowest available permissions; never enter a Binance trading API key.
+- Post IDs and usernames are normalized before storage.
+- Image URLs must use HTTPS and an approved X image hostname.
+- The keyword blocklist is checked before account binding, image download, queue insertion, or publication.
+- Empty-text posts are rejected.
+- A bound X username prevents accidental publication from another account.
 
-## Reporting vulnerabilities
+## Binance Square requests
 
-Do not include live keys, cookies, tokens, or account credentials in reports. Reproduce with dummy values and provide the affected version, browser version, and concise steps.
+- Requests use the configured Binance Square OpenAPI HTTPS endpoint.
+- The API key is sent only in the Binance Square request header.
+- Image uploads are limited to four images and use downloaded bytes from approved X hosts.
+- Permanent API rejections are not retried automatically; temporary failures have a bounded retry count.
+
+## Browser permissions
+
+The extension requests only local storage, alarms, and host access needed for X pages, X media, and the Binance Square API. It does not request browsing history, downloads, tabs, cookies, or clipboard permissions.
+
+## Reporting
+
+Do not publish API keys or sensitive logs in a public issue. Revoke a key immediately if it may have been exposed.

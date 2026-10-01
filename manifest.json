@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "X → Binance Square Auto Sync",
-  "version": "1.2.4",
-  "description": "Automatically mirrors your successful original and quote X posts to Binance Square using your own Square OpenAPI key.",
+  "name": "X → Binance Square Manual Sync",
+  "version": "2.1.0",
+  "description": "Manually sync complete posts from your own X account, including hashtags and images, to Binance Square.",
   "permissions": [
     "storage",
     "alarms"
@@ -10,7 +10,10 @@
   "host_permissions": [
     "https://x.com/*",
     "https://twitter.com/*",
-    "https://www.binance.com/*"
+    "https://www.binance.com/*",
+    "https://pbs.twimg.com/*",
+    "https://*.amazonaws.com/*",
+    "https://*.amazonaws.com.cn/*"
   ],
   "background": {
     "service_worker": "service-worker.js"
@@ -22,24 +25,13 @@
         "https://twitter.com/*"
       ],
       "js": [
-        "page-hook.js"
+        "manual-sync.js"
       ],
-      "run_at": "document_start",
-      "world": "MAIN"
-    },
-    {
-      "matches": [
-        "https://x.com/*",
-        "https://twitter.com/*"
-      ],
-      "js": [
-        "bridge.js"
-      ],
-      "run_at": "document_start"
+      "run_at": "document_idle"
     }
   ],
   "action": {
-    "default_title": "X → Binance Square Auto Sync",
+    "default_title": "X → Binance Square Manual Sync",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon-16.png",

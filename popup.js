@@ -16,6 +16,7 @@ function reasonLabel(item) {
 
 async function render() {
   const el = document.getElementById("status");
+  const toggleButton = document.getElementById("toggleSync");
   const {lastStatus, queue = {}, squareApiKey, boundUsername, enabled} = await chrome.storage.local.get([
     "lastStatus", "queue", "squareApiKey", "boundUsername", "enabled"
   ]);
@@ -25,23 +26,31 @@ async function render() {
     .filter(item => item.status === "blocked")
     .sort((a, b) => (b.rejected_at || b.updated_at || 0) - (a.rejected_at || a.updated_at || 0))
     .slice(0, 3);
+  const paused = enabled === false;
+  toggleButton.textContent = paused ? "恢复同步" : "暂停同步";
+  toggleButton.className = paused ? "resume" : "";
 
   if (!squareApiKey) {
     el.innerHTML = '<div class="bad">● 尚未填写币安广场 OpenAPI Key</div>';
     return;
   }
-  if (enabled === false) {
-    el.innerHTML = '<div class="bad">● 自动同步已停用</div>';
+  if (paused) {
+    el.innerHTML = '<div class="bad">● 手动同步已暂停</div><div class="muted">点击“恢复同步”后才能使用 X 页面上的同步按钮</div>';
     return;
   }
 
   let summary = "";
   if (!lastStatus) {
-    summary = `<div class="ok">● 已启用${boundUsername ? ` · @${escapeHtml(boundUsername)}` : ""}</div><div class="muted">尚无同步记录${pending ? `，待处理 ${pending} 条` : ""}</div>`;
+    summary = `<div class="ok">● 手动同步已启用${boundUsername ? ` · @${escapeHtml(boundUsername)}` : ""}</div><div class="muted">请在 X 推文旁点击“同步”${pending ? `；待处理 ${pending} 条` : ""}</div>`;
+  } else if (lastStatus?.status === "skipped_keyword") {
+    const keyword = escapeHtml(lastStatus.matched_keyword || "未知关键词");
+    summary = `<div class="bad">● 最近一条已跳过</div><div class="muted">${formatTime(lastStatus.at)}<br>命中不同步关键词：${keyword}<br>未进入发布或重试队列</div>`;
   } else if (lastStatus.ok) {
     const note = lastStatus.links_removed ? "<br>币安拒绝原链接，已自动移除链接后发布" : "";
+    const images = lastStatus.image_count ? `<br>已同步 ${Number(lastStatus.image_count)} 张图片` : "";
+    const noId = lastStatus.published_without_id ? "<br>币安已接收内容，但未返回帖子 ID" : "";
     const link = lastStatus.square_url ? `<br><a href="${escapeHtml(lastStatus.square_url)}" target="_blank">查看币安广场帖子</a>` : "";
-    summary = `<div class="ok">● 最近同步成功</div><div class="muted">${formatTime(lastStatus.at)}${note}${link}</div>`;
+    summary = `<div class="ok">● 最近同步成功</div><div class="muted">${formatTime(lastStatus.at)}${images}${note}${noId}${link}</div>`;
   } else {
     const isRejected = lastStatus.status === "blocked";
     const title = isRejected ? "● 最近一条被币安拒绝" : "● 最近同步失败，等待重试";
@@ -61,6 +70,11 @@ async function render() {
 }
 
 document.getElementById("settings").onclick = () => chrome.runtime.openOptionsPage();
+document.getElementById("toggleSync").onclick = async () => {
+  const {enabled} = await chrome.storage.local.get("enabled");
+  await chrome.storage.local.set({enabled: enabled === false});
+  await render();
+};
 document.getElementById("retry").onclick = async () => {
   const {queue = {}} = await chrome.storage.local.get("queue");
   const rejectedWithLinks = Object.values(queue).filter(item =>

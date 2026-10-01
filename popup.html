@@ -12,13 +12,15 @@
   button{border:0;border-radius:8px;padding:8px 11px;cursor:pointer}
   button:disabled{opacity:.6;cursor:wait}
   #settings{background:#171717;color:#fff}
+  #toggleSync{background:#fff2d8;color:#8a4b08}
+  #toggleSync.resume{background:#e7f7ec;color:#166534}
   .rejected-title{margin-top:14px;padding-top:12px;border-top:1px solid #eee;color:#b42318;font-size:12px;font-weight:700}
   .rejected-item{margin-top:8px;padding:9px;background:#fff4f2;border:1px solid #ffd5cf;border-radius:8px;color:#6b2720;font-size:11px;line-height:1.5;word-break:break-word}
   .excerpt{color:#666}
 </style>
-<h1>X → 币安广场自动同步</h1>
+<h1>X → 币安广场手动同步</h1>
 <div id="status">读取状态…</div>
-<div class="actions"><button id="settings">设置</button><button id="retry">立即重试</button></div>
-<p class="muted">红色角标表示存在被拒绝的内容。点击插件可查看错误码、拒绝原因和推文摘要。</p>
+<div class="actions"><button id="toggleSync">暂停同步</button><button id="settings">设置</button><button id="retry">立即重试</button></div>
+<p class="muted">只在当前登录账号自己的推文旁显示按钮；点击后会先读取完整正文和标签再同步。</p>
 <script src="popup.js"></script>
 </html>

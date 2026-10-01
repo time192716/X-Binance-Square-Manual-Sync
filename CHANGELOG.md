@@ -1,5 +1,39 @@
 # Changelog
 
+## 2.1.0 — 2026-10-01
+
+- Shows the manual sync button only on posts authored by the currently signed-in X account.
+- Verifies the current X username again in the service worker before queueing a post.
+- Expands X's truncated long-post text before extraction and refuses to publish if the full text cannot be expanded.
+- Preserves paragraph breaks, hashtags, and cashtags; missing linked tags are appended as a DOM-compatibility safeguard.
+- Excludes quoted-post text, expansion controls, and images from the selected post's own content.
+
+## 2.0.0 — 2026-10-01
+
+- Replaces automatic `CreateTweet` interception with explicit per-post manual sync.
+- Adds a “同步” button to each X post action bar; posts are sent only after a user click.
+- Removes the MAIN-world page hook and message bridge from the extension manifest and package.
+- Rejects the legacy automatic queue message type in the service worker.
+- Extracts the selected post's text, canonical status URL, author, and up to four of its own images from the visible X page.
+- Keeps image upload, keyword blocking, account binding, retries, and pause/resume controls.
+
+## 1.4.0 — 2026-07-31
+
+- Adds a configurable, case-insensitive keyword blocklist for posts that must not be synchronized.
+- Uses `OKX`, `OKEx`, and `欧易` as conservative defaults; users can add, remove, or clear keywords in settings.
+- Filters matching posts before image download, Binance requests, queueing, or X-account binding.
+- Adds a one-click pause/resume button to the extension popup.
+- Shows the matched keyword when a post is skipped.
+
+## 1.3.0 — 2026-07-27
+
+- Synchronizes up to four photos from new original or quote X posts.
+- Downloads only X photo media from `pbs.twimg.com`; videos and animated GIFs remain excluded.
+- Uploads photos through Binance Square's official presigned-image workflow before publishing them in `imageList`.
+- Polls Binance image processing and caches processed image URLs so post retries do not upload the same images again.
+- Adds narrowly scoped host access for X image downloads and Binance's S3 presigned uploads.
+- Shows the synchronized image count in the extension popup.
+
 ## 1.2.4 — 2026-07-19
 
 - When manually retrying rejected posts that contain links, asks for confirmation first.

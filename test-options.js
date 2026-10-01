@@ -9,7 +9,7 @@ class Element {
 }
 
 (async () => {
-  const ids = ["key", "keyState", "enabled", "bound", "status", "save", "reset", "clear"];
+  const ids = ["key", "keyState", "enabled", "blockKeywords", "bound", "status", "save", "reset", "clear"];
   const elements = Object.fromEntries(ids.map(id => [id, new Element()]));
   const store = {squareApiKey: "existing-secret-value-123", enabled: true};
   const chrome = {storage: {local: {
@@ -28,12 +28,15 @@ class Element {
   await new Promise(resolve => setTimeout(resolve, 10));
   assert.equal(elements.key.value, "", "saved key must never be restored into the DOM");
   assert.match(elements.keyState.textContent, /已安全保存/);
+  assert.match(elements.blockKeywords.value, /OKX/);
 
   elements.key.value = "replacement-secret-value-456";
+  elements.blockKeywords.value = "OKX, 欧易\n自定义词\nokx";
   await elements.save.click();
   assert.equal(store.squareApiKey, "replacement-secret-value-456");
   assert.equal(elements.key.value, "", "input must be cleared immediately after saving");
   assert.match(elements.status.textContent, /隐藏/);
+  assert.equal(JSON.stringify(store.blockKeywords), JSON.stringify(["OKX", "欧易", "自定义词"]));
 
   await elements.clear.click();
   assert.equal(store.squareApiKey, undefined);

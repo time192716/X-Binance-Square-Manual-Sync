@@ -1,44 +1,37 @@
-# 隐私说明 / Privacy Policy
+# Privacy
 
-生效日期：2026-07-19
+## What the extension reads
 
-## 收集的数据
+The extension runs on `x.com` and `twitter.com` so it can identify the currently signed-in username and display a manual sync button only beside that account's own posts. It does not automatically publish posts.
 
-本扩展不运营中心服务器，也不收集分析数据。扩展仅在用户主动于 X 网页发布内容后，处理 X 返回的成功 `CreateTweet` 响应，提取：
+Only after the user clicks that button, the extension reads the selected post's:
 
-- 新推文 ID；
-- 当前 X 用户名；
-- 最终推文文字；
-- 推文公开链接。
+- text;
+- hashtags, cashtags, and paragraph breaks contained in that text;
+- author username;
+- status ID and URL;
+- up to four attached X image URLs.
 
-这些信息只用于把该条内容发布到用户自己的币安广场。
+Quoted-post images are excluded from the selected post's image list.
 
-## OpenAPI Key
+## What the extension stores locally
 
-- 用户的币安广场 OpenAPI Key 存在 `chrome.storage.local`，不会使用 `chrome.storage.sync`。
-- 设置页保存后立即清空输入框；以后只显示“已配置”，不会把已保存密钥重新填回网页 DOM。
-- 扩展仅把密钥发送给 `https://www.binance.com/` 的币安广场发布接口。
-- 没有任何开发者中转服务器。
-- 用户可随时在设置页删除密钥，卸载扩展也会删除扩展本地数据。
+The extension stores the Binance Square API key, enable switch, keyword blocklist, bound X username, selected-post delivery queue, and latest delivery status in `chrome.storage.local`.
 
-本地隐藏不等于硬件加密。如果电脑、浏览器配置目录或扩展本身被恶意软件控制，保存在浏览器本地的数据仍可能暴露。
+The delivery queue contains only posts explicitly selected by the user. Records left by older automatic-sync versions are discarded during the v2.0 update and are never retried.
 
-## 不读取的数据
+## Network access
 
-扩展不申请、不读取也不传输：
+Network requests are limited to:
 
-- 剪贴板内容；
-- 键盘输入记录；
-- X 密码、Cookie、私信；
-- 浏览历史和下载内容；
-- 币安交易 API、资产或交易数据；
-- X 页面中与成功发推无关的网络请求体。
+- X image hosts, to download images from a post selected by the user;
+- Binance Square OpenAPI, to publish the selected text and images.
 
-## 对外传输
+The extension has no analytics, advertising, telemetry, or third-party collection endpoint.
 
-仅有两类平台通信：
+## Data handling
 
-1. 用户已经登录并使用的 X 网站；
-2. 用户配置密钥后，直接请求币安广场官方发布接口。
-
-扩展不会向开发者或第三方分析服务发送数据。
+- The API key remains in the browser's local extension storage.
+- Downloaded image bytes are kept only as part of the local delivery record until that record is pruned.
+- No data is sold or shared with unrelated third parties.
+- Disabling the extension prevents new manual submissions.
